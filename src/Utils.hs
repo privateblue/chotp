@@ -5,8 +5,8 @@ import Control.Distributed.Process
 import Control.Monad                (forM_)
 import Types
 
-logInfo :: String -> Process ()
-logInfo msg = liftIO . putStrLn $ msg
+logDebug :: String -> Process ()
+logDebug msg = liftIO . putStrLn $ msg
 
 sleep :: Int -> Process ()
 sleep s = liftIO $ threadDelay $ s * 1000000
