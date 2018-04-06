@@ -78,8 +78,8 @@ agent = do
 
 remotable ['agent]
 
-master :: Backend -> MasterConfig -> [NodeId] -> Process ()
-master backend (MasterConfig sendFor waitFor withSeed) agents = do
+master :: Backend -> SendFor -> WaitFor -> WithSeed -> [NodeId] -> Process ()
+master backend sendFor waitFor withSeed agents = do
   logDebug "Spawning agents..."
   pids <- forM agents $ \nodeId -> spawn nodeId $(mkStaticClosure 'agent)
   logDebug "Starting messages..."
@@ -92,18 +92,13 @@ master backend (MasterConfig sendFor waitFor withSeed) agents = do
   broadcast pids Kill
   terminateAllSlaves backend
 
-run :: IO ()
-run = do
-  args <- getArgs
-  let remoteTable = __remoteTable initRemoteTable
-  case args of
-    ["agent", host, port] -> do
-      backend <- initializeBackend host port remoteTable
-      startSlave backend
-    ["master", host, port, sendFor, waitFor, withSeed] -> do
-      backend <- initializeBackend host port remoteTable
-      let sf = read sendFor
-          wf = read waitFor
-          ws = read withSeed
-          mc = MasterConfig sf wf ws
-      startMaster backend (master backend mc)
+run :: Config -> IO ()
+run config = case config of
+  AgentConfig host port -> do
+    backend <- initializeBackend host port remoteTable
+    startSlave backend
+  MasterConfig host port sendFor waitFor withSeed -> do
+    backend <- initializeBackend host port remoteTable
+    startMaster backend (master backend sendFor waitFor withSeed)
+  where
+    remoteTable = __remoteTable initRemoteTable
