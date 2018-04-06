@@ -11,7 +11,7 @@ main = run =<< execParser configInfo
     configInfo = info (config <**> helper) $
       fullDesc <>
       progDesc "CH/OTP solution"
-      
+
     config :: Parser Config
     config = subparser $
       command "agent" (info agentConfig (progDesc "Run as agent")) <>
@@ -32,11 +32,11 @@ main = run =<< execParser configInfo
     port = strOption $ (long "port")
 
     sendFor :: Parser SendFor
-    sendFor = option auto $ (long "sendFor")
+    sendFor = option auto $ (long "send-for")
 
     waitFor :: Parser WaitFor
-    waitFor = option auto $ (long "waitFor")
+    waitFor = option auto $ (long "wait-for")
 
     withSeed :: Parser WithSeed
-    withSeed = option auto $ (long "withSeed")
+    withSeed = option auto $ (long "with-seed")
 
