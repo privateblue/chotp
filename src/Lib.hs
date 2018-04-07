@@ -27,11 +27,11 @@ agent = do
   logDebug $ (show myPid) ++ " Started"
   genPid          <- spawnLocal $ gen myPid $ mkStdGen seed
   listen myPid pids genPid [] 0
-  logDebug "Done"
+  logDebug $ (show myPid) ++ ": Done"
   where
     gen :: ProcessId -> StdGen -> Process ()
     gen agentPid g = do
-      maybeStop <- expectTimeout 1000 :: Process (Maybe Protocol)
+      maybeStop <- expectTimeout 1000
       case maybeStop of
         Just Stop -> pure ()
         Nothing -> do
@@ -46,7 +46,7 @@ agent = do
            -> Timestamp
            -> Process ()
     listen myPid pids genPid history t = do
-      msg <- expect :: Process Protocol
+      msg <- expect
       case msg of
         Gen d -> do
           let nt = t + 1
@@ -66,7 +66,7 @@ agent = do
           listen myPid pids genPid history nt
         Kill -> do
           let res = result $ sort history
-          logDebug $ "\nRESULT: " ++ (show res) ++ "\n"
+          logDebug $ (show myPid) ++ ": RESULT: " ++ (show res)
 
     result :: [Entry] -> (Int, Double)
     result history =
@@ -80,15 +80,15 @@ remotable ['agent]
 
 master :: Backend -> SendFor -> WaitFor -> WithSeed -> [NodeId] -> Process ()
 master backend sendFor waitFor withSeed agents = do
-  logDebug "Spawning agents..."
+  logDebug "MASTER: Spawning agents..."
   pids <- forM agents $ \nodeId -> spawn nodeId $(mkStaticClosure 'agent)
-  logDebug "Starting messages..."
+  logDebug "MASTER: Starting messages..."
   broadcast pids (Start pids withSeed)
   sleep sendFor
-  logDebug "Stopping messages..."
+  logDebug "MASTER: Stopping messages..."
   broadcast pids Stop
   sleep waitFor
-  logDebug "Halting agents..."
+  logDebug "MASTER: Halting agents..."
   broadcast pids Kill
   terminateAllSlaves backend
 
