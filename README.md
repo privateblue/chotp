@@ -14,7 +14,13 @@ stack build
 
 ### using a script
 
-Run ```./run.sh``` to start five messaging ("agent") nodes and the master node on localhost, with pre-set parameters. Use this file to configure hostnames and ports.
+Run 
+
+```
+./run.sh
+```
+
+to start five messaging ("agent") nodes and the master node on localhost, with pre-set parameters. Use this file to configure hostnames and ports.
 
 ### manually
 
